@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { sfx } from '../../sound/sfx';
@@ -19,8 +19,6 @@ export const Read: React.FC<ReadProps> = ({
   onComplete,
   onAudioStateChange,
 }) => {
-  const [hasCompletedSentence, setHasCompletedSentence] = useState<boolean>(false);
-
   const handleFinish = () => {
     sfx.stopVoice();
     sfx.playCorrectChime();
@@ -56,7 +54,6 @@ export const Read: React.FC<ReadProps> = ({
             autoplayDelayMs={400}
             showReplayButton={true}
             onAudioStateChange={onAudioStateChange}
-            onComplete={() => setHasCompletedSentence(true)}
           />
         </div>
 

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Volume2, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { PrimitiveState } from '../../types/primitive';
 import { sfx } from '../../sound/sfx';
 import { ReadAloudCaption } from '../../components/common';
 
@@ -41,7 +40,6 @@ export const NewWord: React.FC<NewWordProps> = ({
   onComplete,
   onAudioStateChange,
 }) => {
-  const [state, setState] = useState<PrimitiveState>('IDLE');
   const [isSpeakingWord, setIsSpeakingWord] = useState<boolean>(false);
 
   const wordAudioSource = pronunciationAudio || word;
@@ -52,15 +50,12 @@ export const NewWord: React.FC<NewWordProps> = ({
     sfx.speakPrompt(wordAudioSource, () => {
       setIsSpeakingWord(false);
       onAudioStateChange?.(false);
-      setState('AWAITING_INTERACTION');
     });
   };
 
   const handleFinish = () => {
-    setState('FEEDBACK');
     sfx.playCorrectChime();
     setTimeout(() => {
-      setState('COMPLETE');
       onComplete?.();
     }, 600);
   };

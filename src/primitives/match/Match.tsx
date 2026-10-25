@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Volume2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { sfx } from '../../sound/sfx';
 
@@ -12,22 +13,46 @@ export interface MatchPair {
 
 export interface MatchProps {
   instruction?: string;
+  promptAudio?: string;
   pairs: MatchPair[];
   onComplete?: () => void;
+  onAudioStateChange?: (isPlaying: boolean) => void;
 }
 
 export const Match: React.FC<MatchProps> = ({
   instruction = "Tap an item on the left, then tap its match on the right!",
+  promptAudio,
   pairs,
   onComplete,
+  onAudioStateChange,
 }) => {
   const [selectedLeft, setSelectedLeft] = useState<string | null>(null);
   const [selectedRight, setSelectedRight] = useState<string | null>(null);
   const [matchedIds, setMatchedIds] = useState<Set<string>>(new Set());
   const [mismatch, setMismatch] = useState<boolean>(false);
+  const [isSpeakingPrompt, setIsSpeakingPrompt] = useState<boolean>(false);
 
   // Shuffle right items on mount so they aren't side-by-side
   const [shuffledRight] = useState(() => [...pairs].sort(() => Math.random() - 0.5));
+
+  const audioPromptString = promptAudio || instruction;
+
+  const playPromptAudio = useCallback(() => {
+    setIsSpeakingPrompt(true);
+    onAudioStateChange?.(true);
+    sfx.speakPrompt(audioPromptString, () => {
+      setIsSpeakingPrompt(false);
+      onAudioStateChange?.(false);
+    });
+  }, [audioPromptString, onAudioStateChange]);
+
+  // Autoplay prompt on mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      playPromptAudio();
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [playPromptAudio]);
 
   const handleLeftClick = (id: string) => {
     if (matchedIds.has(id)) return;
@@ -81,9 +106,24 @@ export const Match: React.FC<MatchProps> = ({
 
   return (
     <div className="w-full max-w-3xl flex flex-col items-center">
-      {/* Header Banner */}
-      <div className="w-full bg-white rounded-3xl p-6 shadow-xl border-4 border-emerald-200 flex items-center justify-between gap-4 mb-8">
-        <div>
+      {/* Header Banner with Audio Replay Button */}
+      <div className="w-full bg-white rounded-3xl p-6 shadow-xl border-4 border-emerald-200 flex flex-col md:flex-row items-center gap-5 mb-8">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          animate={isSpeakingPrompt ? { scale: [1, 1.08, 1] } : {}}
+          transition={isSpeakingPrompt ? { repeat: Infinity, duration: 1.2 } : {}}
+          onClick={playPromptAudio}
+          className="relative bg-emerald-500 hover:bg-emerald-600 text-white p-4 rounded-2xl shadow-md transition flex items-center justify-center cursor-pointer"
+          title="Tap to hear instructions again"
+        >
+          <Volume2 className="w-8 h-8" />
+          <span className="absolute -bottom-2 bg-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+            {isSpeakingPrompt ? 'Listening...' : 'Hear Prompt'}
+          </span>
+        </motion.button>
+
+        <div className="flex-1 text-center md:text-left">
           <span className="text-xs text-emerald-600 font-bold uppercase tracking-wider block mb-1">
             Tap to Match
           </span>
@@ -91,6 +131,7 @@ export const Match: React.FC<MatchProps> = ({
             {instruction}
           </h2>
         </div>
+
         <div className="bg-emerald-50 text-emerald-700 px-4 py-2 rounded-2xl font-bold text-sm border border-emerald-200">
           Matched: {matchedIds.size} / {pairs.length}
         </div>

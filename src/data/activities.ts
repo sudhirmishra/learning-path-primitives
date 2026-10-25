@@ -1,6 +1,6 @@
-import { ChoiceItem } from './types/primitive';
-import { MatchPair } from './primitives/match';
-import { ThinkOption } from './primitives/think';
+import { ChoiceItem } from '../types/primitive';
+import { MatchPair } from '../primitives/match';
+import { ThinkOption } from '../primitives/think';
 
 export interface ActivityCatalogItem {
   id: string;

@@ -7,9 +7,8 @@ import {
   Match,
   Think,
 } from './primitives';
-import { AttemptDetails, ResultSummary } from './types/primitive';
-import { ACTIVITIES_CATALOG, ACTIVITY_DATA, ActivityCatalogItem } from './data/activities';
-import { Star, ArrowLeft, Terminal, Play, BookOpen, Compass } from 'lucide-react';
+import { ACTIVITIES_CATALOG, ACTIVITY_DATA } from './data/activities';
+import { Star, ArrowLeft, Terminal, Play, Compass } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function App() {

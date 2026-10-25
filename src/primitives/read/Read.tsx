@@ -19,43 +19,98 @@ export const Read: React.FC<ReadProps> = ({
   onAudioStateChange,
 }) => {
   const [activeWordIndex, setActiveWordIndex] = useState<number>(-1);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const words = wordsProp || sentence.split(/\s+/);
-  const intervalRef = useRef<number | null>(null);
+  const fallbackTimerRef = useRef<number | null>(null);
+
+  // Compute character ranges for each word to match speech boundary events
+  const wordRanges = useRef<Array<{ start: number; end: number }>>([]);
+  useEffect(() => {
+    let currentPos = 0;
+    wordRanges.current = words.map((w) => {
+      const start = sentence.indexOf(w, currentPos);
+      currentPos = start + w.length;
+      return { start, end: currentPos };
+    });
+  }, [sentence, words]);
+
+  const stopPlayback = useCallback(() => {
+    sfx.stopVoice();
+    setIsPlaying(false);
+    setActiveWordIndex(-1);
+    onAudioStateChange?.(false);
+    if (fallbackTimerRef.current) {
+      clearInterval(fallbackTimerRef.current);
+      fallbackTimerRef.current = null;
+    }
+  }, [onAudioStateChange]);
 
   const startReadAlong = useCallback(() => {
+    stopPlayback();
+    setIsPlaying(true);
     setActiveWordIndex(0);
     onAudioStateChange?.(true);
 
-    sfx.speakPrompt(sentence, () => {
-      onAudioStateChange?.(false);
-      setActiveWordIndex(-1);
-    });
+    let hasReceivedBoundary = false;
 
-    // Approximate synchronized word highlighting
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    const msPerWord = 480;
-    let idx = 0;
-    intervalRef.current = window.setInterval(() => {
-      idx++;
-      if (idx < words.length) {
-        setActiveWordIndex(idx);
-      } else {
-        if (intervalRef.current) clearInterval(intervalRef.current);
+    // Use speech boundary events for true synchronized voice reading
+    sfx.speakPrompt(
+      sentence,
+      () => {
+        setIsPlaying(false);
+        setActiveWordIndex(-1);
+        onAudioStateChange?.(false);
+        if (fallbackTimerRef.current) clearInterval(fallbackTimerRef.current);
+      },
+      (charIndex) => {
+        hasReceivedBoundary = true;
+        // Find which word matches this character index
+        const matchIdx = wordRanges.current.findIndex(
+          (r) => charIndex >= r.start && charIndex <= r.end
+        );
+        if (matchIdx !== -1) {
+          setActiveWordIndex(matchIdx);
+        }
       }
-    }, msPerWord);
-  }, [sentence, words.length, onAudioStateChange]);
+    );
 
+    // Fallback timer only if browser does not emit boundary events
+    let fallbackIdx = 0;
+    fallbackTimerRef.current = window.setInterval(() => {
+      if (hasReceivedBoundary) {
+        if (fallbackTimerRef.current) clearInterval(fallbackTimerRef.current);
+        return;
+      }
+      fallbackIdx++;
+      if (fallbackIdx < words.length) {
+        setActiveWordIndex(fallbackIdx);
+      } else {
+        if (fallbackTimerRef.current) clearInterval(fallbackTimerRef.current);
+      }
+    }, 450);
+  }, [sentence, words.length, onAudioStateChange, stopPlayback]);
+
+  // Autoplay on mount
   useEffect(() => {
     const timer = setTimeout(() => {
       startReadAlong();
     }, 400);
     return () => {
       clearTimeout(timer);
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      stopPlayback();
     };
-  }, [startReadAlong]);
+  }, [startReadAlong, stopPlayback]);
+
+  const handleWordTap = (word: string, index: number) => {
+    stopPlayback();
+    setActiveWordIndex(index);
+    sfx.speakPrompt(word, () => {
+      setTimeout(() => setActiveWordIndex(-1), 400);
+    });
+  };
 
   const handleFinish = () => {
+    stopPlayback();
     sfx.playCorrectChime();
     setTimeout(() => {
       onComplete?.();
@@ -87,15 +142,11 @@ export const Read: React.FC<ReadProps> = ({
               <motion.span
                 key={index}
                 animate={isHighlighted ? { scale: 1.15, y: -4 } : { scale: 1, y: 0 }}
-                transition={{ duration: 0.2 }}
-                onClick={() => {
-                  sfx.speakPrompt(word);
-                  setActiveWordIndex(index);
-                  setTimeout(() => setActiveWordIndex(-1), 600);
-                }}
+                transition={{ duration: 0.15 }}
+                onClick={() => handleWordTap(word, index)}
                 className={`text-2xl md:text-3xl font-bold px-3 py-1.5 rounded-2xl cursor-pointer transition-all ${
                   isHighlighted
-                    ? 'bg-amber-400 text-slate-900 shadow-md shadow-amber-200'
+                    ? 'bg-amber-400 text-slate-900 shadow-lg shadow-amber-200 ring-4 ring-amber-200'
                     : 'text-slate-700 hover:bg-indigo-100 hover:text-indigo-900'
                 }`}
               >
@@ -106,7 +157,7 @@ export const Read: React.FC<ReadProps> = ({
         </div>
 
         <p className="text-xs text-slate-400 mb-6 font-semibold">
-          💡 Tap any word to hear it pronounced
+          💡 Tap any word to hear it pronounced individually
         </p>
 
         {/* Action Controls */}
@@ -114,11 +165,13 @@ export const Read: React.FC<ReadProps> = ({
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            animate={isPlaying ? { scale: [1, 1.06, 1] } : {}}
+            transition={isPlaying ? { repeat: Infinity, duration: 1.2 } : {}}
             onClick={startReadAlong}
             className="bg-amber-400 hover:bg-amber-500 text-white font-bold px-6 py-3 rounded-2xl shadow-md flex items-center gap-2 cursor-pointer transition"
           >
             <Volume2 className="w-6 h-6" />
-            <span>Read Together Again</span>
+            <span>{isPlaying ? 'Reading Together...' : 'Read Together Again'}</span>
           </motion.button>
 
           <motion.button

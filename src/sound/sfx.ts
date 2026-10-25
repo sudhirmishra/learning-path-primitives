@@ -3,6 +3,7 @@ class SoundEffectsEngine {
   private voices: SpeechSynthesisVoice[] = [];
   private voicesLoaded = false;
   private currentAudioElement: HTMLAudioElement | null = null;
+  private activeUtterance: SpeechSynthesisUtterance | null = null;
 
   constructor() {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -31,7 +32,6 @@ class SoundEffectsEngine {
     }
     if (this.voices.length === 0) return null;
 
-    // Preferred natural, neural, and child-friendly voice names
     const preferredPatterns = [
       /natural/i,
       /google.*english/i,
@@ -49,13 +49,11 @@ class SoundEffectsEngine {
       v.lang.startsWith('en') || v.lang.startsWith('en_')
     );
 
-    // 1. Check preferred high-quality natural voices
     for (const pattern of preferredPatterns) {
       const match = englishVoices.find((v) => pattern.test(v.name));
       if (match) return match;
     }
 
-    // 2. Reject known robotic low-quality fallbacks (like eSpeak) if alternatives exist
     const nonRobotic = englishVoices.filter((v) => !v.name.toLowerCase().includes('espeak'));
     if (nonRobotic.length > 0) {
       return nonRobotic[0];
@@ -80,15 +78,11 @@ class SoundEffectsEngine {
     return this.ctx;
   }
 
-  /**
-   * Warm marimba / glockenspiel-style celebration chord with harmonics
-   */
   playCorrectChime(): void {
     const ctx = this.getContext();
     if (!ctx) return;
     const now = ctx.currentTime;
 
-    // C-major cheerful arpeggio (C5, E5, G5, C6) with warm harmonic decay
     const notes = [
       { freq: 523.25, time: 0 },
       { freq: 659.25, time: 0.08 },
@@ -97,13 +91,11 @@ class SoundEffectsEngine {
     ];
 
     notes.forEach(({ freq, time }) => {
-      // Fundamental tone (sine for warmth)
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = 'sine';
       osc.frequency.setValueAtTime(freq, now + time);
 
-      // Gentle bell strike attack, exponential soft decay
       gain.gain.setValueAtTime(0, now + time);
       gain.gain.linearRampToValueAtTime(0.3, now + time + 0.015);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + time + 0.55);
@@ -113,7 +105,6 @@ class SoundEffectsEngine {
       osc.start(now + time);
       osc.stop(now + time + 0.58);
 
-      // Soft harmonic overtone (triangle wave an octave up)
       const overtone = ctx.createOscillator();
       const overGain = ctx.createGain();
       overtone.type = 'triangle';
@@ -128,9 +119,6 @@ class SoundEffectsEngine {
     });
   }
 
-  /**
-   * Gentle, friendly cartoon boing (non-punitive)
-   */
   playIncorrectBoing(): void {
     const ctx = this.getContext();
     if (!ctx) return;
@@ -140,7 +128,6 @@ class SoundEffectsEngine {
     const gain = ctx.createGain();
 
     osc.type = 'sine';
-    // Friendly pitch drop mimicking a soft spring
     osc.frequency.setValueAtTime(280, now);
     osc.frequency.exponentialRampToValueAtTime(140, now + 0.28);
 
@@ -154,11 +141,14 @@ class SoundEffectsEngine {
   }
 
   /**
-   * Hybrid vocal prompt playback:
-   * 1. If audioSource is an audio file URL (.mp3, .wav, .ogg, etc.), plays real audio.
-   * 2. Otherwise, uses speech synthesis with natural voice selection, gentle rate, and expressive pitch.
+   * Speaks prompt text or plays audio file.
+   * Supports `onBoundary` for word-by-word synchronized highlighting.
    */
-  speakPrompt(audioSourceOrText: string, onEnd?: () => void): void {
+  speakPrompt(
+    audioSourceOrText: string,
+    onEnd?: () => void,
+    onBoundary?: (charIndex: number, wordLength?: number) => void
+  ): void {
     if (!audioSourceOrText) {
       onEnd?.();
       return;
@@ -186,30 +176,47 @@ class SoundEffectsEngine {
         });
         return;
       } catch {
-        // Fall back to synthesis if audio file playback fails
+        // Fall back to synthesis
       }
     }
 
-    // Speech synthesis fallback
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
       if (onEnd) setTimeout(onEnd, 1200);
       return;
     }
 
+    // Resume speech synthesis if paused by browser
+    if (window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+    }
+
     const utterance = new SpeechSynthesisUtterance(audioSourceOrText);
+    this.activeUtterance = utterance;
+
     const bestVoice = this.getBestVoice();
     if (bestVoice) {
       utterance.voice = bestVoice;
     }
 
-    // Kid-friendly speech cadence: slightly slower for comprehension, warmer pitch
-    utterance.rate = 0.88;
-    utterance.pitch = 1.18;
+    utterance.rate = 0.86;
+    utterance.pitch = 1.15;
+
+    // Word boundary event for precise read-along highlighting
+    if (onBoundary) {
+      utterance.onboundary = (event) => {
+        if (event.name === 'word') {
+          onBoundary(event.charIndex, event.charLength);
+        }
+      };
+    }
 
     utterance.onend = () => {
+      this.activeUtterance = null;
       onEnd?.();
     };
+
     utterance.onerror = () => {
+      this.activeUtterance = null;
       onEnd?.();
     };
 
@@ -222,6 +229,7 @@ class SoundEffectsEngine {
       this.currentAudioElement.currentTime = 0;
       this.currentAudioElement = null;
     }
+    this.activeUtterance = null;
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }

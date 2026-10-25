@@ -16,6 +16,41 @@ export interface ActivityCatalogItem {
 }
 
 export const ACTIVITIES_CATALOG: ActivityCatalogItem[] = [
+  // Think Usages
+  {
+    id: 'think-swim-fly',
+    primitiveId: 'think',
+    primitiveName: 'Think',
+    title: 'Animal Riddle: Who Can Fly?',
+    description: 'Direct logic question with 2 choices: Which animal can soar in the sky?',
+    emoji: '🦅',
+    category: 'Logic',
+    color: 'from-teal-400 to-emerald-500',
+    accentBorder: 'border-teal-300',
+  },
+  {
+    id: 'think-day-night',
+    primitiveId: 'think',
+    primitiveName: 'Think',
+    title: 'Day & Night Sky Pattern',
+    description: 'Decipher the celestial sequence of suns and moons.',
+    emoji: '🌙',
+    category: 'Logic',
+    color: 'from-purple-400 to-indigo-500',
+    accentBorder: 'border-purple-300',
+  },
+  {
+    id: 'think-shape-sequence',
+    primitiveId: 'think',
+    primitiveName: 'Think',
+    title: 'Geometric Color Rhythm',
+    description: 'Identify which colorful gem completes the logical pattern.',
+    emoji: '💎',
+    category: 'Logic',
+    color: 'from-fuchsia-400 to-violet-500',
+    accentBorder: 'border-fuchsia-300',
+  },
+
   // Find Usages (Visual Search)
   {
     id: 'find-hidden-butterfly',
@@ -159,58 +194,54 @@ export const ACTIVITIES_CATALOG: ActivityCatalogItem[] = [
     color: 'from-pink-400 to-rose-400',
     accentBorder: 'border-pink-300',
   },
-
-  // Think Usages
-  {
-    id: 'think-day-night',
-    primitiveId: 'think',
-    primitiveName: 'Think',
-    title: 'Day & Night Sky Pattern',
-    description: 'Decipher the celestial sequence of suns and moons.',
-    emoji: '🌙',
-    category: 'Logic',
-    color: 'from-purple-400 to-indigo-500',
-    accentBorder: 'border-purple-300',
-  },
-  {
-    id: 'think-swim-fly',
-    primitiveId: 'think',
-    primitiveName: 'Think',
-    title: 'Animal Riddle: Can It Fly?',
-    description: 'Use your logic with 2 simple choices: Which animal can soar in the sky?',
-    emoji: '🦅',
-    category: 'Logic',
-    color: 'from-teal-400 to-emerald-500',
-    accentBorder: 'border-teal-300',
-  },
-  {
-    id: 'think-shape-sequence',
-    primitiveId: 'think',
-    primitiveName: 'Think',
-    title: 'Geometric Color Rhythm',
-    description: 'Identify which colorful gem completes the logical pattern.',
-    emoji: '💎',
-    category: 'Logic',
-    color: 'from-fuchsia-400 to-violet-500',
-    accentBorder: 'border-fuchsia-300',
-  },
 ];
 
 // Activity Datasets
 export const ACTIVITY_DATA = {
-  // Think: 2-Choice Question Riddle (Reusing Think primitive with 2 choices)
+  // Think 1: 2-Choice Direct Riddle (No pattern box, clean direct question)
   'think-swim-fly': {
-    promptText: 'Look at the question: Which of these animals can fly high in the sky?',
-    patternSequence: [
-      { emoji: '☁️', label: 'Sky' },
-      { emoji: '🌈', label: 'Rainbow' },
-      { emoji: '☁️', label: 'Sky' },
-    ],
+    promptText: 'Which of these animals can fly high in the sky?',
     options: [
       { id: 'eagle', emoji: '🦅', label: 'Golden Eagle' },
       { id: 'whale', emoji: '🐋', label: 'Blue Whale' },
     ] as ThinkOption[],
     correctOptionId: 'eagle',
+  },
+
+  // Think 2: Celestial Pattern
+  'think-day-night': {
+    promptText: 'Look at the day and night sky pattern. What comes next?',
+    patternSequence: [
+      { emoji: '☀️', label: 'Sun' },
+      { emoji: '🌙', label: 'Moon' },
+      { emoji: '☀️', label: 'Sun' },
+      { emoji: '🌙', label: 'Moon' },
+      { emoji: '☀️', label: 'Sun' },
+    ],
+    options: [
+      { id: 'cloud', emoji: '☁️', label: 'Cloud' },
+      { id: 'moon', emoji: '🌙', label: 'Moon' },
+      { id: 'star', emoji: '⭐', label: 'Star' },
+    ] as ThinkOption[],
+    correctOptionId: 'moon',
+  },
+
+  // Think 3: Shape Rhythm
+  'think-shape-sequence': {
+    promptText: 'Follow the gem rhythm: Diamond, Heart, Diamond, Heart... What is next?',
+    patternSequence: [
+      { emoji: '💎', label: 'Diamond' },
+      { emoji: '❤️', label: 'Heart' },
+      { emoji: '💎', label: 'Diamond' },
+      { emoji: '❤️', label: 'Heart' },
+      { emoji: '💎', label: 'Diamond' },
+    ],
+    options: [
+      { id: 'star', emoji: '⭐', label: 'Star' },
+      { id: 'heart', emoji: '❤️', label: 'Heart' },
+      { id: 'circle', emoji: '🔵', label: 'Circle' },
+    ] as ThinkOption[],
+    correctOptionId: 'heart',
   },
 
   // Find 1: Garden Butterfly
@@ -362,40 +393,5 @@ export const ACTIVITY_DATA = {
       { id: 'hen', leftLabel: 'Chick', leftEmoji: '🐥', rightLabel: 'Hen', rightEmoji: '🐔' },
       { id: 'sheep', leftLabel: 'Lamb', leftEmoji: '🐑', rightLabel: 'Sheep', rightEmoji: '🐏' },
     ] as MatchPair[],
-  },
-
-  // Think 1: Day & Night
-  'think-day-night': {
-    promptText: 'Look at the day and night sky pattern. What comes next?',
-    patternSequence: [
-      { emoji: '☀️', label: 'Sun' },
-      { emoji: '🌙', label: 'Moon' },
-      { emoji: '☀️', label: 'Sun' },
-      { emoji: '🌙', label: 'Moon' },
-      { emoji: '☀️', label: 'Sun' },
-    ],
-    options: [
-      { id: 'cloud', emoji: '☁️', label: 'Cloud' },
-      { id: 'moon', emoji: '🌙', label: 'Moon' },
-      { id: 'star', emoji: '⭐', label: 'Star' },
-    ] as ThinkOption[],
-    correctOptionId: 'moon',
-  },
-  // Think 2: Shape Rhythm
-  'think-shape-sequence': {
-    promptText: 'Follow the gem rhythm: Diamond, Heart, Diamond, Heart... What is next?',
-    patternSequence: [
-      { emoji: '💎', label: 'Diamond' },
-      { emoji: '❤️', label: 'Heart' },
-      { emoji: '💎', label: 'Diamond' },
-      { emoji: '❤️', label: 'Heart' },
-      { emoji: '💎', label: 'Diamond' },
-    ],
-    options: [
-      { id: 'star', emoji: '⭐', label: 'Star' },
-      { id: 'heart', emoji: '❤️', label: 'Heart' },
-      { id: 'circle', emoji: '🔵', label: 'Circle' },
-    ] as ThinkOption[],
-    correctOptionId: 'heart',
   },
 };

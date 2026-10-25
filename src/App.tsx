@@ -9,20 +9,51 @@ import {
   Find,
 } from './primitives';
 import { ACTIVITIES_CATALOG, ACTIVITY_DATA } from './data/activities';
-import { Star, ArrowLeft, Terminal, Play, Compass } from 'lucide-react';
+import { LETTER_A_PATH_STEPS, LETTER_A_DATA } from './data/letterAPath';
+import { Star, ArrowLeft, ArrowRight, Terminal, Play, Compass, CheckCircle2, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function App() {
+  // Navigation mode: 'catalog' | 'learning-path' | 'single-activity'
+  const [navMode, setNavMode] = useState<'catalog' | 'learning-path' | 'single-activity'>('catalog');
   const [activeActivityId, setActiveActivityId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+
+  // Letter A Learning Path State
+  const [currentPathStepIndex, setCurrentPathStepIndex] = useState<number>(0);
+  const [isCurrentStepCompleted, setIsCurrentStepCompleted] = useState<boolean>(false);
+
   const [eventLogs, setEventLogs] = useState<string[]>([
     '[HOST] Learning Path Engine initialized',
-    '[HOST] 15 Activities catalog loaded (7 Primitives)',
+    '[HOST] 7 UI Game Primitives loaded',
+    '[HOST] "Letter A Adventure" path ready',
   ]);
 
   const addLog = (msg: string) => {
     setEventLogs((prev) => [...prev.slice(-15), msg]);
   };
+
+  const handleStepComplete = (stepTitle: string) => {
+    setIsCurrentStepCompleted(true);
+    addLog(`[HOST EVENT] Step Completed: ${stepTitle}`);
+  };
+
+  const goToNextStep = () => {
+    if (currentPathStepIndex < LETTER_A_PATH_STEPS.length - 1) {
+      const nextIdx = currentPathStepIndex + 1;
+      setCurrentPathStepIndex(nextIdx);
+      setIsCurrentStepCompleted(false);
+      addLog(`[HOST] Advanced to Step ${nextIdx + 1}: ${LETTER_A_PATH_STEPS[nextIdx].title}`);
+    } else {
+      // Completed all 7 steps
+      setIsCurrentStepCompleted(true);
+      addLog('[HOST] 🎉 Congratulations! Completed entire Letter A Learning Path!');
+    }
+  };
+
+  const currentPathStep = LETTER_A_PATH_STEPS[currentPathStepIndex];
+  const isLastPathStep = currentPathStepIndex === LETTER_A_PATH_STEPS.length - 1;
+  const isPathFinished = isLastPathStep && isCurrentStepCompleted;
 
   const currentActivity = activeActivityId
     ? ACTIVITIES_CATALOG.find((a) => a.id === activeActivityId)
@@ -38,7 +69,7 @@ export function App() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-between p-4 md:p-8">
       {/* Top Header Bar */}
-      <header className="w-full max-w-5xl flex items-center justify-between bg-white/90 backdrop-blur rounded-3xl p-5 shadow-md border-4 border-amber-200 mb-8">
+      <header className="w-full max-w-5xl flex flex-col md:flex-row items-center justify-between bg-white/90 backdrop-blur rounded-3xl p-5 shadow-md border-4 border-amber-200 mb-8 gap-4">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-400 to-orange-400 flex items-center justify-center text-white shadow-inner">
             <Star className="w-7 h-7 fill-current" />
@@ -55,32 +86,48 @@ export function App() {
           </div>
         </div>
 
-        {activeActivityId ? (
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => {
-              setActiveActivityId(null);
-              addLog('[HOST] Navigated back to Activities Catalog');
-            }}
-            className="flex items-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-4 py-2.5 rounded-2xl border-2 border-indigo-200 transition cursor-pointer"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span className="text-sm font-bold">Back to Quests</span>
-          </motion.button>
-        ) : (
-          <div className="hidden sm:flex items-center gap-2 text-slate-500 font-bold text-sm bg-slate-50 border border-slate-200 px-4 py-2 rounded-2xl">
-            <Compass className="w-4 h-4 text-amber-500" />
-            <span>15 Quests Across 7 Primitives</span>
-          </div>
-        )}
+        {/* Header Action Controls */}
+        <div className="flex items-center gap-3">
+          {navMode !== 'catalog' ? (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                setNavMode('catalog');
+                setActiveActivityId(null);
+                addLog('[HOST] Navigated back to Home Catalog');
+              }}
+              className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2.5 rounded-2xl border border-slate-300 transition cursor-pointer text-sm"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Catalog</span>
+            </motion.button>
+          ) : (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                setNavMode('learning-path');
+                setCurrentPathStepIndex(0);
+                setIsCurrentStepCompleted(false);
+                addLog('[HOST] Started: Letter A Learning Path (7 Primitives Flow)');
+              }}
+              className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold px-5 py-2.5 rounded-2xl shadow-md transition cursor-pointer text-sm"
+            >
+              <Play className="w-4 h-4 fill-current" />
+              <span>Start Letter "A" Journey</span>
+            </motion.button>
+          )}
+        </div>
       </header>
 
       {/* Main View Area */}
       <main className="w-full max-w-5xl flex-1 flex flex-col items-center justify-center">
         <AnimatePresence mode="wait">
-          {!activeActivityId ? (
-            /* --- Activities Catalog Index Page --- */
+          {/* ============================================================== */}
+          {/* VIEW 1: HOME CATALOG & LEARNING PATH HERO                      */}
+          {/* ============================================================== */}
+          {navMode === 'catalog' && (
             <motion.div
               key="catalog"
               initial={{ opacity: 0, y: 15 }}
@@ -88,21 +135,33 @@ export function App() {
               exit={{ opacity: 0, y: -15 }}
               className="w-full flex flex-col items-center"
             >
-              {/* Hero Banner */}
+              {/* Featured 7-Primitive Flow Hero Banner */}
               <div className="w-full bg-gradient-to-r from-amber-400 via-orange-400 to-rose-400 rounded-3xl p-8 shadow-xl text-white mb-8 flex flex-col md:flex-row items-center justify-between gap-6 border-4 border-amber-200">
                 <div className="max-w-xl text-center md:text-left">
                   <span className="text-xs font-extrabold uppercase tracking-widest bg-white/20 px-3 py-1 rounded-full inline-block mb-3">
-                    Play • Listen • Discover
+                    Featured Full Learning Path
                   </span>
                   <h2 className="text-3xl md:text-4xl font-extrabold mb-2 leading-tight">
-                    Choose Your Learning Adventure!
+                    Letter "A" Adventure
                   </h2>
-                  <p className="text-amber-50 text-base md:text-lg font-medium">
-                    Pick any quest below to practice visual search, riddles, stories, opposites, matching, and logic puzzles.
+                  <p className="text-amber-50 text-base md:text-lg font-medium mb-4">
+                    Experience all 7 game primitives connected into an interactive learning path: Apple, Astronaut, Airplane, Acorn, Asleep, and Ant!
                   </p>
+                  <button
+                    onClick={() => {
+                      setNavMode('learning-path');
+                      setCurrentPathStepIndex(0);
+                      setIsCurrentStepCompleted(false);
+                      addLog('[HOST] Started: Letter A Learning Path');
+                    }}
+                    className="bg-white text-orange-600 hover:bg-orange-50 font-extrabold px-6 py-3 rounded-2xl shadow-lg transition active:scale-95 cursor-pointer flex items-center gap-2 text-base mx-auto md:mx-0"
+                  >
+                    <Play className="w-5 h-5 fill-current" />
+                    <span>Play Letter A Journey (7 Steps)</span>
+                  </button>
                 </div>
-                <div className="text-7xl md:text-8xl drop-shadow-md select-none animate-bounce">
-                  🚀
+                <div className="text-8xl md:text-9xl drop-shadow-md select-none animate-bounce">
+                  🅰️
                 </div>
               </div>
 
@@ -123,7 +182,7 @@ export function App() {
                 ))}
               </div>
 
-              {/* Grid of Activity Cards */}
+              {/* Grid of Standalone Quests */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
                 {filteredActivities.map((act) => (
                   <motion.div
@@ -132,6 +191,7 @@ export function App() {
                     whileTap={{ scale: 0.98 }}
                     onClick={() => {
                       setActiveActivityId(act.id);
+                      setNavMode('single-activity');
                       addLog(`[HOST] Launched Activity: ${act.title} (${act.primitiveName})`);
                     }}
                     className={`bg-white rounded-3xl p-6 shadow-lg border-4 ${act.accentBorder} hover:shadow-xl transition-all duration-200 flex flex-col justify-between cursor-pointer group`}
@@ -177,8 +237,169 @@ export function App() {
                 ))}
               </div>
             </motion.div>
-          ) : (
-            /* --- Active Activity View --- */
+          )}
+
+          {/* ============================================================== */}
+          {/* VIEW 2: 7-PRIMITIVE LETTER "A" LEARNING PATH FLOW              */}
+          {/* ============================================================== */}
+          {navMode === 'learning-path' && (
+            <motion.div
+              key="learning-path"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              className="w-full flex flex-col items-center"
+            >
+              {/* Stepper Progress Bar */}
+              <div className="w-full max-w-4xl bg-white rounded-3xl p-5 shadow-lg border-2 border-amber-200 mb-8 flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">🅰️</span>
+                    <div>
+                      <h3 className="font-extrabold text-slate-800 text-base md:text-lg">
+                        Letter A Journey: {currentPathStep.title}
+                      </h3>
+                      <p className="text-xs text-slate-500 font-medium">
+                        Step {currentPathStepIndex + 1} of {LETTER_A_PATH_STEPS.length} • Primitive: {currentPathStep.badge}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Next Step Button (Visible/Highlighted when activity is completed) */}
+                  <motion.button
+                    animate={isCurrentStepCompleted ? { scale: [1, 1.08, 1], boxShadow: ['0 0 0px rgba(16, 185, 129, 0)', '0 0 20px rgba(16, 185, 129, 0.6)', '0 0 0px rgba(16, 185, 129, 0)'] } : {}}
+                    transition={isCurrentStepCompleted ? { repeat: Infinity, duration: 1.2 } : {}}
+                    onClick={goToNextStep}
+                    disabled={!isCurrentStepCompleted && !isPathFinished}
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-extrabold text-sm shadow-md transition cursor-pointer ${
+                      isCurrentStepCompleted
+                        ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                        : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                    }`}
+                  >
+                    <span>{isLastPathStep ? 'Complete Journey' : 'Next Activity'}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </motion.button>
+                </div>
+
+                {/* Progress Indicators */}
+                <div className="grid grid-cols-7 gap-2 pt-2 border-t border-slate-100">
+                  {LETTER_A_PATH_STEPS.map((step, idx) => {
+                    const isPassed = idx < currentPathStepIndex;
+                    const isCurrent = idx === currentPathStepIndex;
+                    return (
+                      <div
+                        key={step.id}
+                        className={`h-2.5 rounded-full transition-all duration-300 ${
+                          isPassed
+                            ? 'bg-emerald-500'
+                            : isCurrent
+                            ? isCurrentStepCompleted
+                              ? 'bg-emerald-400 animate-pulse'
+                              : 'bg-amber-400'
+                            : 'bg-slate-200'
+                        }`}
+                        title={step.title}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Finished Celebration Screen */}
+              {isPathFinished ? (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="w-full max-w-2xl bg-white rounded-3xl p-8 shadow-2xl border-4 border-emerald-400 text-center flex flex-col items-center"
+                >
+                  <div className="text-8xl mb-4">🏆 🌟 🎉</div>
+                  <h2 className="text-4xl font-extrabold text-emerald-600 mb-2">
+                    Letter "A" Master!
+                  </h2>
+                  <p className="text-slate-600 text-base md:text-lg font-medium mb-6 max-w-md">
+                    You completed all 7 interactive game primitives, discovering Apples, Astronauts, Airplanes, Acorns, and Ants!
+                  </p>
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => {
+                        setCurrentPathStepIndex(0);
+                        setIsCurrentStepCompleted(false);
+                      }}
+                      className="bg-amber-400 hover:bg-amber-500 text-white font-extrabold px-6 py-3 rounded-2xl flex items-center gap-2 shadow-md cursor-pointer transition"
+                    >
+                      <RotateCcw className="w-5 h-5" />
+                      <span>Replay Journey</span>
+                    </button>
+                    <button
+                      onClick={() => setNavMode('catalog')}
+                      className="bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold px-6 py-3 rounded-2xl flex items-center gap-2 shadow-md cursor-pointer transition"
+                    >
+                      <CheckCircle2 className="w-5 h-5" />
+                      <span>Back to Catalog</span>
+                    </button>
+                  </div>
+                </motion.div>
+              ) : (
+                /* Step Primitive Container */
+                <div className="w-full flex flex-col items-center">
+                  {currentPathStep.primitiveId === 'new-word' && (
+                    <NewWord
+                      {...LETTER_A_DATA['step-1-new-word']}
+                      onComplete={() => handleStepComplete(currentPathStep.title)}
+                    />
+                  )}
+
+                  {currentPathStep.primitiveId === 'read' && (
+                    <Read
+                      {...LETTER_A_DATA['step-2-read']}
+                      onComplete={() => handleStepComplete(currentPathStep.title)}
+                    />
+                  )}
+
+                  {currentPathStep.primitiveId === 'listen-find' && (
+                    <ListenAndFind
+                      {...LETTER_A_DATA['step-3-listen-find']}
+                      onComplete={() => handleStepComplete(currentPathStep.title)}
+                    />
+                  )}
+
+                  {currentPathStep.primitiveId === 'find' && (
+                    <Find
+                      {...LETTER_A_DATA['step-4-find']}
+                      onComplete={() => handleStepComplete(currentPathStep.title)}
+                    />
+                  )}
+
+                  {currentPathStep.primitiveId === 'opposites' && (
+                    <Opposites
+                      {...LETTER_A_DATA['step-5-opposites']}
+                      onComplete={() => handleStepComplete(currentPathStep.title)}
+                    />
+                  )}
+
+                  {currentPathStep.primitiveId === 'match' && (
+                    <Match
+                      {...LETTER_A_DATA['step-6-match']}
+                      onComplete={() => handleStepComplete(currentPathStep.title)}
+                    />
+                  )}
+
+                  {currentPathStep.primitiveId === 'think' && (
+                    <Think
+                      {...LETTER_A_DATA['step-7-think']}
+                      onComplete={() => handleStepComplete(currentPathStep.title)}
+                    />
+                  )}
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {/* ============================================================== */}
+          {/* VIEW 3: SINGLE STANDALONE ACTIVITY VIEW                        */}
+          {/* ============================================================== */}
+          {navMode === 'single-activity' && (
             <motion.div
               key="active-activity"
               initial={{ opacity: 0, scale: 0.96 }}
@@ -186,7 +407,6 @@ export function App() {
               exit={{ opacity: 0, scale: 0.96 }}
               className="w-full flex flex-col items-center"
             >
-              {/* Activity Context Subheader */}
               <div className="w-full max-w-4xl flex items-center justify-between mb-6 px-4">
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">{currentActivity?.emoji}</span>
@@ -199,7 +419,6 @@ export function App() {
                 </span>
               </div>
 
-              {/* Render Respective Primitive with Configured Dataset */}
               {activeActivityId === 'think-swim-fly' && (
                 <Think
                   {...ACTIVITY_DATA['think-swim-fly']}
@@ -324,7 +543,7 @@ export function App() {
             <Terminal className="w-4 h-4" />
             <span>Host Runtime Event Bus:</span>
           </div>
-          <span className="text-slate-500">15 Modeled Activities</span>
+          <span className="text-slate-500">Letter A Journey • 7 Primitives Flow</span>
         </div>
         <div className="h-16 overflow-y-auto space-y-1 text-slate-300">
           {eventLogs.map((log, index) => (

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Sparkles, CheckCircle, RefreshCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { sfx } from '../../sound/sfx';
@@ -107,8 +107,14 @@ export const Find: React.FC<FindProps> = ({
             <span className="text-xs text-amber-600 font-extrabold uppercase tracking-wider">
               Visual Search Quest • Find
             </span>
-            <span className="text-xs font-bold bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full">
-              Target: {targetEmoji} {targetLabel}
+            <span className="text-xs font-bold bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+              Target:
+              {targetAssetUrl ? (
+                <img src={targetAssetUrl} alt={targetLabel} className="w-4 h-4 inline-block object-contain" />
+              ) : (
+                <span>{targetEmoji}</span>
+              )}
+              {targetLabel}
             </span>
           </div>
           <div className="bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-xs font-bold border border-amber-200 uppercase tracking-wide">

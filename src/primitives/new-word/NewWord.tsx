@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Volume2, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Volume2, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { PrimitiveState } from '../../types/primitive';
 import { sfx } from '../../sound/sfx';

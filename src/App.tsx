@@ -8,7 +8,7 @@ import {
   Think,
 } from './primitives';
 import { ChoiceItem, AttemptDetails, ResultSummary } from './types/primitive';
-import { Star, Sparkles, Terminal, Layers } from 'lucide-react';
+import { Star, Terminal } from 'lucide-react';
 
 type PrimitiveTab = 'listen-find' | 'new-word' | 'read' | 'opposites' | 'match' | 'think';
 

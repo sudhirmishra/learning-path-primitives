@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Volume2, Play, Pause, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Volume2, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { PrimitiveState } from '../../types/primitive';
 import { sfx } from '../../sound/sfx';
 
 export interface ReadProps {
@@ -19,19 +18,16 @@ export const Read: React.FC<ReadProps> = ({
   onComplete,
   onAudioStateChange,
 }) => {
-  const [state, setState] = useState<PrimitiveState>('IDLE');
   const [activeWordIndex, setActiveWordIndex] = useState<number>(-1);
   const words = wordsProp || sentence.split(/\s+/);
   const intervalRef = useRef<number | null>(null);
 
   const startReadAlong = useCallback(() => {
-    setState('PROMPTING');
     setActiveWordIndex(0);
     onAudioStateChange?.(true);
 
     sfx.speakPrompt(sentence, () => {
       onAudioStateChange?.(false);
-      setState('AWAITING_INTERACTION');
       setActiveWordIndex(-1);
     });
 
@@ -60,10 +56,8 @@ export const Read: React.FC<ReadProps> = ({
   }, [startReadAlong]);
 
   const handleFinish = () => {
-    setState('FEEDBACK');
     sfx.playCorrectChime();
     setTimeout(() => {
-      setState('COMPLETE');
       onComplete?.();
     }, 500);
   };

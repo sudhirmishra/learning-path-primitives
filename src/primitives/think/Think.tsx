@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Sparkles, CheckCircle2, RotateCcw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { sfx } from '../../sound/sfx';
 

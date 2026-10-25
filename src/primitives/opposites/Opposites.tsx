@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Volume2, Sparkles, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Volume2, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { PrimitiveState } from '../../types/primitive';
 import { sfx } from '../../sound/sfx';
 
 export interface OppositesPairItem {
@@ -30,16 +29,13 @@ export const Opposites: React.FC<OppositesProps> = ({
   onComplete,
   onAudioStateChange,
 }) => {
-  const [state, setState] = useState<PrimitiveState>('IDLE');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
 
   const speakPrompt = () => {
-    setState('PROMPTING');
     onAudioStateChange?.(true);
     sfx.speakPrompt(promptQuestion, () => {
       onAudioStateChange?.(false);
-      setState('AWAITING_INTERACTION');
     });
   };
 
@@ -58,7 +54,6 @@ export const Opposites: React.FC<OppositesProps> = ({
         setSelectedId(item.id);
         setFeedback('correct');
         sfx.playCorrectChime();
-        setState('COMPLETE');
         setTimeout(() => {
           onComplete?.();
         }, 1200);

@@ -25,8 +25,7 @@ export function App() {
 
   const [eventLogs, setEventLogs] = useState<string[]>([
     '[HOST] Learning Path Engine initialized',
-    '[HOST] 7 UI Game Primitives loaded',
-    '[HOST] "Letter A Adventure" path ready',
+    '[HOST] "Letter A is for Apple" journey loaded (5 focused steps)',
   ]);
 
   const addLog = (msg: string) => {
@@ -45,9 +44,9 @@ export function App() {
       setIsCurrentStepCompleted(false);
       addLog(`[HOST] Advanced to Step ${nextIdx + 1}: ${LETTER_A_PATH_STEPS[nextIdx].title}`);
     } else {
-      // Completed all 7 steps
+      // Completed all steps
       setIsCurrentStepCompleted(true);
-      addLog('[HOST] 🎉 Congratulations! Completed entire Letter A Learning Path!');
+      addLog('[HOST] 🎉 Congratulations! Completed the Letter A is for Apple Journey!');
     }
   };
 
@@ -110,12 +109,12 @@ export function App() {
                 setNavMode('learning-path');
                 setCurrentPathStepIndex(0);
                 setIsCurrentStepCompleted(false);
-                addLog('[HOST] Started: Letter A Learning Path (7 Primitives Flow)');
+                addLog('[HOST] Started: "Letter A is for Apple" Journey');
               }}
-              className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold px-5 py-2.5 rounded-2xl shadow-md transition cursor-pointer text-sm"
+              className="flex items-center gap-2 bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 text-white font-extrabold px-5 py-2.5 rounded-2xl shadow-md transition cursor-pointer text-sm"
             >
               <Play className="w-4 h-4 fill-current" />
-              <span>Start Letter "A" Journey</span>
+              <span>Start "A is for Apple"</span>
             </motion.button>
           )}
         </div>
@@ -135,33 +134,33 @@ export function App() {
               exit={{ opacity: 0, y: -15 }}
               className="w-full flex flex-col items-center"
             >
-              {/* Featured 7-Primitive Flow Hero Banner */}
-              <div className="w-full bg-gradient-to-r from-amber-400 via-orange-400 to-rose-400 rounded-3xl p-8 shadow-xl text-white mb-8 flex flex-col md:flex-row items-center justify-between gap-6 border-4 border-amber-200">
+              {/* Featured Focused Flow Hero Banner */}
+              <div className="w-full bg-gradient-to-r from-red-500 via-rose-500 to-amber-400 rounded-3xl p-8 shadow-xl text-white mb-8 flex flex-col md:flex-row items-center justify-between gap-6 border-4 border-amber-200">
                 <div className="max-w-xl text-center md:text-left">
                   <span className="text-xs font-extrabold uppercase tracking-widest bg-white/20 px-3 py-1 rounded-full inline-block mb-3">
-                    Featured Full Learning Path
+                    Targeted Early Learning Journey
                   </span>
                   <h2 className="text-3xl md:text-4xl font-extrabold mb-2 leading-tight">
-                    Letter "A" Adventure
+                    Letter A: A is for Apple!
                   </h2>
-                  <p className="text-amber-50 text-base md:text-lg font-medium mb-4">
-                    Experience all 7 game primitives connected into an interactive learning path: Apple, Astronaut, Airplane, Acorn, Asleep, and Ant!
+                  <p className="text-rose-100 text-base md:text-lg font-medium mb-4">
+                    Designed for early learners with high repetition: learn Letter A, read along with Apple, listen & find with 2 simple choices, spot it in the tree, and solve the sweet fruit riddle!
                   </p>
                   <button
                     onClick={() => {
                       setNavMode('learning-path');
                       setCurrentPathStepIndex(0);
                       setIsCurrentStepCompleted(false);
-                      addLog('[HOST] Started: Letter A Learning Path');
+                      addLog('[HOST] Started: "Letter A is for Apple" Journey');
                     }}
-                    className="bg-white text-orange-600 hover:bg-orange-50 font-extrabold px-6 py-3 rounded-2xl shadow-lg transition active:scale-95 cursor-pointer flex items-center gap-2 text-base mx-auto md:mx-0"
+                    className="bg-white text-rose-600 hover:bg-rose-50 font-extrabold px-6 py-3 rounded-2xl shadow-lg transition active:scale-95 cursor-pointer flex items-center gap-2 text-base mx-auto md:mx-0"
                   >
                     <Play className="w-5 h-5 fill-current" />
-                    <span>Play Letter A Journey (7 Steps)</span>
+                    <span>Start Learning (5 Steps)</span>
                   </button>
                 </div>
                 <div className="text-8xl md:text-9xl drop-shadow-md select-none animate-bounce">
-                  🅰️
+                  🍎
                 </div>
               </div>
 
@@ -240,7 +239,7 @@ export function App() {
           )}
 
           {/* ============================================================== */}
-          {/* VIEW 2: 7-PRIMITIVE LETTER "A" LEARNING PATH FLOW              */}
+          {/* VIEW 2: FOCUSED LETTER "A IS FOR APPLE" LEARNING PATH FLOW     */}
           {/* ============================================================== */}
           {navMode === 'learning-path' && (
             <motion.div
@@ -254,18 +253,18 @@ export function App() {
               <div className="w-full max-w-4xl bg-white rounded-3xl p-5 shadow-lg border-2 border-amber-200 mb-8 flex flex-col gap-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-2xl">🅰️</span>
+                    <span className="text-2xl">🍎</span>
                     <div>
                       <h3 className="font-extrabold text-slate-800 text-base md:text-lg">
-                        Letter A Journey: {currentPathStep.title}
+                        Letter A: {currentPathStep.title}
                       </h3>
                       <p className="text-xs text-slate-500 font-medium">
-                        Step {currentPathStepIndex + 1} of {LETTER_A_PATH_STEPS.length} • Primitive: {currentPathStep.badge}
+                        Step {currentPathStepIndex + 1} of {LETTER_A_PATH_STEPS.length} • {currentPathStep.badge}
                       </p>
                     </div>
                   </div>
 
-                  {/* Next Step Button (Visible/Highlighted when activity is completed) */}
+                  {/* Next Step Button (Visible & Pulsing when activity completes) */}
                   <motion.button
                     animate={isCurrentStepCompleted ? { scale: [1, 1.08, 1], boxShadow: ['0 0 0px rgba(16, 185, 129, 0)', '0 0 20px rgba(16, 185, 129, 0.6)', '0 0 0px rgba(16, 185, 129, 0)'] } : {}}
                     transition={isCurrentStepCompleted ? { repeat: Infinity, duration: 1.2 } : {}}
@@ -282,8 +281,8 @@ export function App() {
                   </motion.button>
                 </div>
 
-                {/* Progress Indicators */}
-                <div className="grid grid-cols-7 gap-2 pt-2 border-t border-slate-100">
+                {/* 5-Step Progress Indicators */}
+                <div className="grid grid-cols-5 gap-2 pt-2 border-t border-slate-100">
                   {LETTER_A_PATH_STEPS.map((step, idx) => {
                     const isPassed = idx < currentPathStepIndex;
                     const isCurrent = idx === currentPathStepIndex;
@@ -313,12 +312,12 @@ export function App() {
                   animate={{ opacity: 1, scale: 1 }}
                   className="w-full max-w-2xl bg-white rounded-3xl p-8 shadow-2xl border-4 border-emerald-400 text-center flex flex-col items-center"
                 >
-                  <div className="text-8xl mb-4">🏆 🌟 🎉</div>
+                  <div className="text-8xl mb-4">🏆 🍎 ⭐</div>
                   <h2 className="text-4xl font-extrabold text-emerald-600 mb-2">
-                    Letter "A" Master!
+                    A is for Apple Master!
                   </h2>
                   <p className="text-slate-600 text-base md:text-lg font-medium mb-6 max-w-md">
-                    You completed all 7 interactive game primitives, discovering Apples, Astronauts, Airplanes, Acorns, and Ants!
+                    Terrific job! You learned Letter A, read sentences, found the apple, spotted it on the tree, and solved the fruit riddle!
                   </p>
                   <div className="flex gap-4">
                     <button
@@ -371,23 +370,9 @@ export function App() {
                     />
                   )}
 
-                  {currentPathStep.primitiveId === 'opposites' && (
-                    <Opposites
-                      {...LETTER_A_DATA['step-5-opposites']}
-                      onComplete={() => handleStepComplete(currentPathStep.title)}
-                    />
-                  )}
-
-                  {currentPathStep.primitiveId === 'match' && (
-                    <Match
-                      {...LETTER_A_DATA['step-6-match']}
-                      onComplete={() => handleStepComplete(currentPathStep.title)}
-                    />
-                  )}
-
                   {currentPathStep.primitiveId === 'think' && (
                     <Think
-                      {...LETTER_A_DATA['step-7-think']}
+                      {...LETTER_A_DATA['step-5-think']}
                       onComplete={() => handleStepComplete(currentPathStep.title)}
                     />
                   )}
@@ -543,7 +528,7 @@ export function App() {
             <Terminal className="w-4 h-4" />
             <span>Host Runtime Event Bus:</span>
           </div>
-          <span className="text-slate-500">Letter A Journey • 7 Primitives Flow</span>
+          <span className="text-slate-500">Letter A Journey • 5 Focused Steps</span>
         </div>
         <div className="h-16 overflow-y-auto space-y-1 text-slate-300">
           {eventLogs.map((log, index) => (

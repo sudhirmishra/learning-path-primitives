@@ -45,7 +45,7 @@ export const ACTIVITIES_CATALOG: ActivityCatalogItem[] = [
     primitiveId: 'new-word',
     primitiveName: 'New Word',
     title: 'Safari Spotlight: Giraffe',
-    description: 'Explore the tallest animal on Earth with pronunciation and fun facts.',
+    description: 'Explore the tallest animal on Earth with pronunciation, fun facts, and read-aloud sentence.',
     emoji: '🦒',
     category: 'Vocabulary',
     color: 'from-yellow-400 to-amber-500',
@@ -56,7 +56,7 @@ export const ACTIVITIES_CATALOG: ActivityCatalogItem[] = [
     primitiveId: 'new-word',
     primitiveName: 'New Word',
     title: 'Space Explorer: Telescope',
-    description: 'Discover how astronomers look at distant stars and planets.',
+    description: 'Discover how astronomers look at distant stars with an interactive example sentence.',
     emoji: '🔭',
     category: 'Concepts',
     color: 'from-indigo-400 to-purple-500',
@@ -191,19 +191,21 @@ export const ACTIVITY_DATA = {
     ] as ChoiceItem[],
   },
 
-  // New Word 1: Giraffe
+  // New Word 1: Giraffe (with exampleSentence & sentenceAudio)
   'new-word-giraffe': {
     word: 'Giraffe',
     phonetics: 'dʒəˈræf',
     visualAsset: { emoji: '🦒', altText: 'Tall Giraffe' },
     funFact: 'Giraffes are the tallest mammals on Earth with super long necks!',
+    exampleSentence: 'The tall giraffe munches fresh leaves from the treetops.',
   },
-  // New Word 2: Telescope
+  // New Word 2: Telescope (with exampleSentence & sentenceAudio)
   'new-word-telescope': {
     word: 'Telescope',
     phonetics: 'ˈtel.ɪ.skoʊp',
     visualAsset: { emoji: '🔭', altText: 'Astronomy Telescope' },
-    funFact: 'Telescopes use curved lenses and mirrors to bring distant galaxies right before your eyes!',
+    funFact: 'Telescopes use curved lenses to bring distant galaxies right to our eyes!',
+    exampleSentence: 'Look through the telescope to see the bright moon and twinkling stars.',
   },
 
   // Read 1: Kitten

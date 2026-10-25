@@ -1,20 +1,32 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Volume2, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { PrimitiveState } from '../../types/primitive';
 import { sfx } from '../../sound/sfx';
+import { ReadAloudCaption } from '../../components/common';
 
 export interface NewWordProps {
+  /** The target word being introduced (e.g. "Giraffe") */
   word: string;
-  pronunciationAudio?: string;
+  /** Optional phonetic spelling (e.g. "dʒəˈræf") */
   phonetics?: string;
+  /** Visual hero asset (emoji or image URL) */
   visualAsset: {
     emoji?: string;
     assetUrl?: string;
     altText: string;
   };
+  /** Fun educational fact */
   funFact?: string;
+  /** Optional contextual example sentence for the word */
+  exampleSentence?: string;
+  /** Optional custom audio source for the sentence (.mp3 URL or audio text) */
+  sentenceAudio?: string;
+  /** Optional custom audio source for the word pronunciation (.mp3 URL) */
+  pronunciationAudio?: string;
+  /** Lifecycle completion callback */
   onComplete?: () => void;
+  /** Audio playback state notification callback */
   onAudioStateChange?: (isPlaying: boolean) => void;
 }
 
@@ -23,32 +35,26 @@ export const NewWord: React.FC<NewWordProps> = ({
   phonetics,
   visualAsset,
   funFact,
+  exampleSentence,
+  sentenceAudio,
+  pronunciationAudio,
   onComplete,
   onAudioStateChange,
 }) => {
   const [state, setState] = useState<PrimitiveState>('IDLE');
-  const [hasTappedHear, setHasTappedHear] = useState(false);
-  const hasMountedRef = useRef(false);
+  const [isSpeakingWord, setIsSpeakingWord] = useState<boolean>(false);
 
-  const speakWord = useCallback(() => {
-    setState('PROMPTING');
+  const wordAudioSource = pronunciationAudio || word;
+
+  const speakWord = () => {
+    setIsSpeakingWord(true);
     onAudioStateChange?.(true);
-    sfx.speakPrompt(word, () => {
+    sfx.speakPrompt(wordAudioSource, () => {
+      setIsSpeakingWord(false);
       onAudioStateChange?.(false);
       setState('AWAITING_INTERACTION');
-      setHasTappedHear(true);
     });
-  }, [word, onAudioStateChange]);
-
-  useEffect(() => {
-    if (!hasMountedRef.current) {
-      hasMountedRef.current = true;
-      const timer = setTimeout(() => {
-        speakWord();
-      }, 350);
-      return () => clearTimeout(timer);
-    }
-  }, [speakWord]);
+  };
 
   const handleFinish = () => {
     setState('FEEDBACK');
@@ -63,10 +69,10 @@ export const NewWord: React.FC<NewWordProps> = ({
     <div className="w-full max-w-2xl flex flex-col items-center">
       {/* Visual Object Card */}
       <motion.div
-        initial={{ scale: 0.85, opacity: 0 }}
+        initial={{ scale: 0.88, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', damping: 15 }}
-        className="w-full bg-white rounded-3xl p-8 shadow-xl border-4 border-amber-200 flex flex-col items-center relative overflow-hidden"
+        className="w-full bg-white rounded-3xl p-6 md:p-8 shadow-xl border-4 border-amber-200 flex flex-col items-center relative overflow-hidden"
       >
         <div className="absolute top-4 right-4 bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
           New Word
@@ -74,10 +80,11 @@ export const NewWord: React.FC<NewWordProps> = ({
 
         {/* Object Illustration / Emoji */}
         <motion.div
-          animate={state === 'PROMPTING' ? { scale: [1, 1.12, 1], rotate: [0, -3, 3, 0] } : {}}
-          transition={{ duration: 1.2, repeat: state === 'PROMPTING' ? Infinity : 0 }}
-          className="w-44 h-44 flex items-center justify-center text-9xl my-4 select-none drop-shadow-md cursor-pointer"
+          animate={isSpeakingWord ? { scale: [1, 1.12, 1], rotate: [0, -3, 3, 0] } : {}}
+          transition={{ duration: 1.2, repeat: isSpeakingWord ? Infinity : 0 }}
+          className="w-36 h-36 md:w-40 md:h-40 flex items-center justify-center text-8xl md:text-9xl my-2 select-none drop-shadow-md cursor-pointer"
           onClick={speakWord}
+          title="Tap to hear word"
         >
           {visualAsset.assetUrl ? (
             <img src={visualAsset.assetUrl} alt={visualAsset.altText} className="max-h-full max-w-full object-contain" />
@@ -87,7 +94,7 @@ export const NewWord: React.FC<NewWordProps> = ({
         </motion.div>
 
         {/* Written Word Label */}
-        <div className="text-center mb-4">
+        <div className="text-center mb-3">
           <h1 className="text-4xl md:text-5xl font-extrabold text-slate-800 tracking-wide">
             {word}
           </h1>
@@ -98,33 +105,49 @@ export const NewWord: React.FC<NewWordProps> = ({
           )}
         </div>
 
-        {/* Fun Fact / Description text */}
+        {/* Context Sentence with ReadAloudCaption */}
+        {exampleSentence && (
+          <div className="w-full my-3">
+            <span className="text-[11px] font-bold text-indigo-500 uppercase tracking-wider block mb-1 text-center">
+              Example Sentence
+            </span>
+            <ReadAloudCaption
+              sentence={exampleSentence}
+              audioSource={sentenceAudio}
+              size="md"
+              autoplay={true}
+              autoplayDelayMs={600}
+              onAudioStateChange={onAudioStateChange}
+            />
+          </div>
+        )}
+
+        {/* Fun Fact */}
         {funFact && (
-          <p className="text-slate-600 bg-sky-50 border border-sky-100 rounded-2xl p-3 text-center text-sm md:text-base font-medium max-w-md mb-6">
+          <p className="text-slate-600 bg-sky-50 border border-sky-100 rounded-2xl p-3 text-center text-xs md:text-sm font-medium max-w-md my-3">
             ✨ {funFact}
           </p>
         )}
 
         {/* Audio Action Button */}
-        <div className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
+        <div className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center mt-3">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={speakWord}
-            className="bg-amber-400 hover:bg-amber-500 text-white font-bold px-6 py-3 rounded-2xl shadow-md flex items-center gap-2 cursor-pointer transition"
+            className="bg-amber-400 hover:bg-amber-500 text-white font-bold px-6 py-3 rounded-2xl shadow-md flex items-center gap-2 cursor-pointer transition text-sm md:text-base"
           >
-            <Volume2 className="w-6 h-6" />
-            <span>Hear Again</span>
+            <Volume2 className="w-5 h-5" />
+            <span>Hear Word</span>
           </motion.button>
 
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleFinish}
-            disabled={!hasTappedHear && state === 'PROMPTING'}
-            className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-7 py-3 rounded-2xl shadow-md flex items-center gap-2 cursor-pointer transition"
+            className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-7 py-3 rounded-2xl shadow-md flex items-center gap-2 cursor-pointer transition text-sm md:text-base"
           >
-            <CheckCircle2 className="w-6 h-6" />
+            <CheckCircle2 className="w-5 h-5" />
             <span>I Learned It!</span>
           </motion.button>
         </div>

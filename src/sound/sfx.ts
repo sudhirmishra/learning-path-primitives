@@ -3,7 +3,7 @@ class SoundEffectsEngine {
   private voices: SpeechSynthesisVoice[] = [];
   private voicesLoaded = false;
   private currentAudioElement: HTMLAudioElement | null = null;
-  private activeUtterance: SpeechSynthesisUtterance | null = null;
+  public activeUtterance: SpeechSynthesisUtterance | null = null;
 
   constructor() {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -229,7 +229,9 @@ class SoundEffectsEngine {
       this.currentAudioElement.currentTime = 0;
       this.currentAudioElement = null;
     }
-    this.activeUtterance = null;
+    if (this.activeUtterance) {
+      this.activeUtterance = null;
+    }
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }

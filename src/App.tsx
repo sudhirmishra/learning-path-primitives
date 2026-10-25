@@ -10,7 +10,7 @@ import {
 } from './primitives';
 import { ACTIVITIES_CATALOG, ACTIVITY_DATA } from './data/activities';
 import { LETTER_A_PATH_STEPS, LETTER_A_DATA } from './data/letterAPath';
-import { Star, ArrowLeft, ArrowRight, Terminal, Play, Compass, CheckCircle2, RotateCcw } from 'lucide-react';
+import { Star, ArrowLeft, ArrowRight, Terminal, Play, CheckCircle2, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function App() {

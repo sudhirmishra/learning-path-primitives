@@ -17,7 +17,7 @@ export function App() {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [eventLogs, setEventLogs] = useState<string[]>([
     '[HOST] Learning Path Engine initialized',
-    '[HOST] 14 Activities catalog loaded (7 Primitives)',
+    '[HOST] 15 Activities catalog loaded (7 Primitives)',
   ]);
 
   const addLog = (msg: string) => {
@@ -33,7 +33,7 @@ export function App() {
       ? ACTIVITIES_CATALOG
       : ACTIVITIES_CATALOG.filter((a) => a.category === selectedCategory);
 
-  const categories = ['All', 'Observation', 'Vocabulary', 'Reading', 'Concepts', 'Association', 'Logic'];
+  const categories = ['All', 'Logic', 'Observation', 'Vocabulary', 'Reading', 'Concepts', 'Association'];
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-between p-4 md:p-8">
@@ -71,7 +71,7 @@ export function App() {
         ) : (
           <div className="hidden sm:flex items-center gap-2 text-slate-500 font-bold text-sm bg-slate-50 border border-slate-200 px-4 py-2 rounded-2xl">
             <Compass className="w-4 h-4 text-amber-500" />
-            <span>14 Quests Across 7 Primitives</span>
+            <span>15 Quests Across 7 Primitives</span>
           </div>
         )}
       </header>
@@ -98,7 +98,7 @@ export function App() {
                     Choose Your Learning Adventure!
                   </h2>
                   <p className="text-amber-50 text-base md:text-lg font-medium">
-                    Pick any quest below to practice visual search, vocabulary, stories, opposites, matching, and logic puzzles.
+                    Pick any quest below to practice visual search, riddles, stories, opposites, matching, and logic puzzles.
                   </p>
                 </div>
                 <div className="text-7xl md:text-8xl drop-shadow-md select-none animate-bounce">
@@ -200,6 +200,13 @@ export function App() {
               </div>
 
               {/* Render Respective Primitive with Configured Dataset */}
+              {activeActivityId === 'think-swim-fly' && (
+                <Think
+                  {...ACTIVITY_DATA['think-swim-fly']}
+                  onComplete={() => addLog('[HOST EVENT] Completed 2-Choice Think Riddle')}
+                />
+              )}
+
               {activeActivityId === 'find-hidden-butterfly' && (
                 <Find
                   {...ACTIVITY_DATA['find-hidden-butterfly']}
@@ -317,7 +324,7 @@ export function App() {
             <Terminal className="w-4 h-4" />
             <span>Host Runtime Event Bus:</span>
           </div>
-          <span className="text-slate-500">14 Modeled Activities • 7 Primitives</span>
+          <span className="text-slate-500">15 Modeled Activities</span>
         </div>
         <div className="h-16 overflow-y-auto space-y-1 text-slate-300">
           {eventLogs.map((log, index) => (

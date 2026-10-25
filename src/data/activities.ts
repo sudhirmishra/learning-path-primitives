@@ -173,6 +173,17 @@ export const ACTIVITIES_CATALOG: ActivityCatalogItem[] = [
     accentBorder: 'border-purple-300',
   },
   {
+    id: 'think-swim-fly',
+    primitiveId: 'think',
+    primitiveName: 'Think',
+    title: 'Animal Riddle: Can It Fly?',
+    description: 'Use your logic with 2 simple choices: Which animal can soar in the sky?',
+    emoji: '🦅',
+    category: 'Logic',
+    color: 'from-teal-400 to-emerald-500',
+    accentBorder: 'border-teal-300',
+  },
+  {
     id: 'think-shape-sequence',
     primitiveId: 'think',
     primitiveName: 'Think',
@@ -187,6 +198,21 @@ export const ACTIVITIES_CATALOG: ActivityCatalogItem[] = [
 
 // Activity Datasets
 export const ACTIVITY_DATA = {
+  // Think: 2-Choice Question Riddle (Reusing Think primitive with 2 choices)
+  'think-swim-fly': {
+    promptText: 'Look at the question: Which of these animals can fly high in the sky?',
+    patternSequence: [
+      { emoji: '☁️', label: 'Sky' },
+      { emoji: '🌈', label: 'Rainbow' },
+      { emoji: '☁️', label: 'Sky' },
+    ],
+    options: [
+      { id: 'eagle', emoji: '🦅', label: 'Golden Eagle' },
+      { id: 'whale', emoji: '🐋', label: 'Blue Whale' },
+    ] as ThinkOption[],
+    correctOptionId: 'eagle',
+  },
+
   // Find 1: Garden Butterfly
   'find-hidden-butterfly': {
     instruction: 'Can you find the golden butterfly hidden in the sunny garden?',

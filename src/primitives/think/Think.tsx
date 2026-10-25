@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Volume2 } from 'lucide-react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { sfx } from '../../sound/sfx';
+import { ReadAloudCaption } from '../../components/common';
 
 export interface ThinkOption {
   id: string;
@@ -30,26 +30,6 @@ export const Think: React.FC<ThinkProps> = ({
 }) => {
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
-  const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
-
-  const audioPromptString = promptAudio || promptText;
-
-  const playPrompt = useCallback(() => {
-    setIsSpeaking(true);
-    onAudioStateChange?.(true);
-    sfx.speakPrompt(audioPromptString, () => {
-      setIsSpeaking(false);
-      onAudioStateChange?.(false);
-    });
-  }, [audioPromptString, onAudioStateChange]);
-
-  // Autoplay prompt on mount
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      playPrompt();
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [playPrompt]);
 
   // Tap an item in the pattern sequence to speak its name
   const handleItemTap = (item: { emoji: string; label: string }) => {
@@ -78,35 +58,25 @@ export const Think: React.FC<ThinkProps> = ({
 
   return (
     <div className="w-full max-w-3xl flex flex-col items-center">
-      {/* Question Header with Audio Replay Button */}
-      <div className="w-full bg-white rounded-3xl p-6 shadow-xl border-4 border-purple-200 flex flex-col md:flex-row items-center gap-5 mb-8">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          animate={isSpeaking ? { scale: [1, 1.08, 1] } : {}}
-          transition={isSpeaking ? { repeat: Infinity, duration: 1.2 } : {}}
-          onClick={playPrompt}
-          className="relative bg-purple-500 hover:bg-purple-600 text-white p-4 rounded-2xl shadow-md transition flex items-center justify-center cursor-pointer"
-          title="Tap to hear question again"
-        >
-          <Volume2 className="w-8 h-8" />
-          <span className="absolute -bottom-2 bg-purple-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-            {isSpeaking ? 'Listening...' : 'Hear Prompt'}
-          </span>
-        </motion.button>
-
-        <div className="flex-1 text-center md:text-left">
-          <span className="text-xs text-purple-600 font-bold uppercase tracking-wider block mb-1">
+      {/* Question Header using ReadAloudCaption */}
+      <div className="w-full bg-white rounded-3xl p-6 shadow-xl border-4 border-purple-200 mb-8">
+        <div className="flex items-center justify-between mb-3 px-1">
+          <span className="text-xs text-purple-600 font-extrabold uppercase tracking-wider">
             Logic & Pattern Quest
           </span>
-          <h2 className="text-2xl md:text-3xl text-slate-800 font-bold">
-            {promptText}
-          </h2>
+          <div className="bg-purple-100 text-purple-700 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+            Think
+          </div>
         </div>
 
-        <div className="bg-purple-100 text-purple-700 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
-          Think
-        </div>
+        <ReadAloudCaption
+          sentence={promptText}
+          audioSource={promptAudio}
+          size="md"
+          autoplay={true}
+          autoplayDelayMs={300}
+          onAudioStateChange={onAudioStateChange}
+        />
       </div>
 
       {/* Pattern Sequence Display */}

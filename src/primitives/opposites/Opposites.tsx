@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Volume2, CheckCircle2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { sfx } from '../../sound/sfx';
+import { ReadAloudCaption } from '../../components/common';
 
 export interface OppositesPairItem {
   id: string;
@@ -11,11 +12,12 @@ export interface OppositesPairItem {
 }
 
 export interface OppositesProps {
-  conceptTitle: string; // e.g. "Big vs Small", "Hot vs Cold"
+  conceptTitle: string;
   leftItem: OppositesPairItem;
   rightItem: OppositesPairItem;
-  promptQuestion?: string; // e.g. "Which one is HOT?"
-  targetAnswerId?: string; // If interactive question mode is enabled
+  promptQuestion?: string;
+  promptAudio?: string;
+  targetAnswerId?: string;
   onComplete?: () => void;
   onAudioStateChange?: (isPlaying: boolean) => void;
 }
@@ -25,26 +27,13 @@ export const Opposites: React.FC<OppositesProps> = ({
   leftItem,
   rightItem,
   promptQuestion = `Look at the opposites: ${leftItem.label} and ${rightItem.label}`,
+  promptAudio,
   targetAnswerId,
   onComplete,
   onAudioStateChange,
 }) => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
-
-  const speakPrompt = () => {
-    onAudioStateChange?.(true);
-    sfx.speakPrompt(promptQuestion, () => {
-      onAudioStateChange?.(false);
-    });
-  };
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      speakPrompt();
-    }, 400);
-    return () => clearTimeout(timer);
-  }, []);
 
   const handleCardClick = (item: OppositesPairItem) => {
     sfx.speakPrompt(item.label);
@@ -73,28 +62,25 @@ export const Opposites: React.FC<OppositesProps> = ({
 
   return (
     <div className="w-full max-w-3xl flex flex-col items-center">
-      {/* Header Prompt Card */}
-      <div className="w-full bg-white rounded-3xl p-6 shadow-xl border-4 border-amber-200 flex flex-col md:flex-row items-center gap-5 mb-8">
-        <button
-          onClick={speakPrompt}
-          className="bg-amber-400 hover:bg-amber-500 text-white p-4 rounded-2xl shadow-md transition flex items-center justify-center cursor-pointer"
-          title="Hear prompt again"
-        >
-          <Volume2 className="w-8 h-8" />
-        </button>
-
-        <div className="flex-1 text-center md:text-left">
-          <span className="text-xs text-amber-500 font-bold uppercase tracking-wider block mb-1">
+      {/* Header Prompt Card using ReadAloudCaption */}
+      <div className="w-full bg-white rounded-3xl p-6 shadow-xl border-4 border-amber-200 mb-8">
+        <div className="flex items-center justify-between mb-3 px-1">
+          <span className="text-xs text-amber-500 font-extrabold uppercase tracking-wider">
             Opposites Concept
           </span>
-          <h2 className="text-2xl md:text-3xl text-slate-800 font-bold tracking-wide">
-            {promptQuestion}
-          </h2>
+          <div className="bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-xs font-bold border border-amber-200 uppercase tracking-wide">
+            {conceptTitle}
+          </div>
         </div>
 
-        <div className="bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-xs font-bold border border-amber-200 uppercase tracking-wide">
-          {conceptTitle}
-        </div>
+        <ReadAloudCaption
+          sentence={promptQuestion}
+          audioSource={promptAudio}
+          size="md"
+          autoplay={true}
+          autoplayDelayMs={300}
+          onAudioStateChange={onAudioStateChange}
+        />
       </div>
 
       {/* Side-by-side Contrast Cards */}

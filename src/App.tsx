@@ -6,6 +6,7 @@ import {
   Opposites,
   Match,
   Think,
+  Find,
 } from './primitives';
 import { ACTIVITIES_CATALOG, ACTIVITY_DATA } from './data/activities';
 import { Star, ArrowLeft, Terminal, Play, Compass } from 'lucide-react';
@@ -16,7 +17,7 @@ export function App() {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [eventLogs, setEventLogs] = useState<string[]>([
     '[HOST] Learning Path Engine initialized',
-    '[HOST] 12 Activities catalog loaded',
+    '[HOST] 14 Activities catalog loaded (7 Primitives)',
   ]);
 
   const addLog = (msg: string) => {
@@ -32,7 +33,7 @@ export function App() {
       ? ACTIVITIES_CATALOG
       : ACTIVITIES_CATALOG.filter((a) => a.category === selectedCategory);
 
-  const categories = ['All', 'Vocabulary', 'Reading', 'Concepts', 'Association', 'Logic'];
+  const categories = ['All', 'Observation', 'Vocabulary', 'Reading', 'Concepts', 'Association', 'Logic'];
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-between p-4 md:p-8">
@@ -70,7 +71,7 @@ export function App() {
         ) : (
           <div className="hidden sm:flex items-center gap-2 text-slate-500 font-bold text-sm bg-slate-50 border border-slate-200 px-4 py-2 rounded-2xl">
             <Compass className="w-4 h-4 text-amber-500" />
-            <span>12 Learning Quests Available</span>
+            <span>14 Quests Across 7 Primitives</span>
           </div>
         )}
       </header>
@@ -97,7 +98,7 @@ export function App() {
                     Choose Your Learning Adventure!
                   </h2>
                   <p className="text-amber-50 text-base md:text-lg font-medium">
-                    Pick any quest below to practice vocabulary, stories, opposites, matching, and logic puzzles.
+                    Pick any quest below to practice visual search, vocabulary, stories, opposites, matching, and logic puzzles.
                   </p>
                 </div>
                 <div className="text-7xl md:text-8xl drop-shadow-md select-none animate-bounce">
@@ -122,7 +123,7 @@ export function App() {
                 ))}
               </div>
 
-              {/* Grid of 12 Activity Cards (2 Usages per Primitive) */}
+              {/* Grid of Activity Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
                 {filteredActivities.map((act) => (
                   <motion.div
@@ -186,7 +187,7 @@ export function App() {
               className="w-full flex flex-col items-center"
             >
               {/* Activity Context Subheader */}
-              <div className="w-full max-w-3xl flex items-center justify-between mb-6 px-4">
+              <div className="w-full max-w-4xl flex items-center justify-between mb-6 px-4">
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">{currentActivity?.emoji}</span>
                   <span className="font-bold text-slate-700 text-lg">
@@ -199,6 +200,24 @@ export function App() {
               </div>
 
               {/* Render Respective Primitive with Configured Dataset */}
+              {activeActivityId === 'find-hidden-butterfly' && (
+                <Find
+                  {...ACTIVITY_DATA['find-hidden-butterfly']}
+                  onTargetFound={() => addLog('[HOST EVENT] onTargetFound: Golden Butterfly')}
+                  onDistractorTap={(d) => addLog(`[HOST EVENT] onDistractorTap: ${d.label}`)}
+                  onComplete={() => addLog('[HOST EVENT] Completed Secret Garden Find Quest')}
+                />
+              )}
+
+              {activeActivityId === 'find-ocean-pearl' && (
+                <Find
+                  {...ACTIVITY_DATA['find-ocean-pearl']}
+                  onTargetFound={() => addLog('[HOST EVENT] onTargetFound: Glowing Pearl')}
+                  onDistractorTap={(d) => addLog(`[HOST EVENT] onDistractorTap: ${d.label}`)}
+                  onComplete={() => addLog('[HOST EVENT] Completed Deep Ocean Pearl Find Quest')}
+                />
+              )}
+
               {activeActivityId === 'listen-find-fruits' && (
                 <ListenAndFind
                   {...ACTIVITY_DATA['listen-find-fruits']}
@@ -298,7 +317,7 @@ export function App() {
             <Terminal className="w-4 h-4" />
             <span>Host Runtime Event Bus:</span>
           </div>
-          <span className="text-slate-500">12 Modeled Activities</span>
+          <span className="text-slate-500">14 Modeled Activities • 7 Primitives</span>
         </div>
         <div className="h-16 overflow-y-auto space-y-1 text-slate-300">
           {eventLogs.map((log, index) => (

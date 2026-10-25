@@ -1,20 +1,45 @@
 import { ChoiceItem } from '../types/primitive';
 import { MatchPair } from '../primitives/match';
 import { ThinkOption } from '../primitives/think';
+import { SceneItem } from '../primitives/find';
 
 export interface ActivityCatalogItem {
   id: string;
-  primitiveId: 'listen-find' | 'new-word' | 'read' | 'opposites' | 'match' | 'think';
+  primitiveId: 'listen-find' | 'new-word' | 'read' | 'opposites' | 'match' | 'think' | 'find';
   primitiveName: string;
   title: string;
   description: string;
   emoji: string;
-  category: 'Vocabulary' | 'Reading' | 'Logic' | 'Concepts' | 'Association';
+  category: 'Vocabulary' | 'Reading' | 'Logic' | 'Concepts' | 'Association' | 'Observation';
   color: string;
   accentBorder: string;
 }
 
 export const ACTIVITIES_CATALOG: ActivityCatalogItem[] = [
+  // Find Usages (Visual Search)
+  {
+    id: 'find-hidden-butterfly',
+    primitiveId: 'find',
+    primitiveName: 'Find',
+    title: 'Secret Garden: Golden Butterfly',
+    description: 'Search the vibrant garden scene to find the hidden golden butterfly!',
+    emoji: '🦋',
+    category: 'Observation',
+    color: 'from-amber-400 to-yellow-500',
+    accentBorder: 'border-amber-300',
+  },
+  {
+    id: 'find-ocean-pearl',
+    primitiveId: 'find',
+    primitiveName: 'Find',
+    title: 'Deep Ocean: Shiny Pearl',
+    description: 'Explore the coral reef and spot the glowing pearl hidden among sea creatures.',
+    emoji: '🦪',
+    category: 'Observation',
+    color: 'from-cyan-400 to-blue-500',
+    accentBorder: 'border-sky-300',
+  },
+
   // Listen & Find Usages
   {
     id: 'listen-find-fruits',
@@ -162,6 +187,42 @@ export const ACTIVITIES_CATALOG: ActivityCatalogItem[] = [
 
 // Activity Datasets
 export const ACTIVITY_DATA = {
+  // Find 1: Garden Butterfly
+  'find-hidden-butterfly': {
+    instruction: 'Can you find the golden butterfly hidden in the sunny garden?',
+    targetLabel: 'Golden Butterfly',
+    targetEmoji: '🦋',
+    backgroundTheme: 'garden' as const,
+    sceneItems: [
+      { id: 'flower1', isTarget: false, label: 'Daisy', emoji: '🌼', x: 18, y: 32, size: 55 },
+      { id: 'flower2', isTarget: false, label: 'Rose', emoji: '🌹', x: 74, y: 22, size: 60 },
+      { id: 'tree', isTarget: false, label: 'Oak Tree', emoji: '🌳', x: 82, y: 72, size: 75 },
+      { id: 'snail', isTarget: false, label: 'Little Snail', emoji: '🐌', x: 28, y: 80, size: 48 },
+      { id: 'ladybug', isTarget: false, label: 'Ladybug', emoji: '🐞', x: 50, y: 55, size: 45 },
+      { id: 'tulip', isTarget: false, label: 'Tulip', emoji: '🌷', x: 42, y: 26, size: 56 },
+      { id: 'caterpillar', isTarget: false, label: 'Caterpillar', emoji: '🐛', x: 62, y: 82, size: 50 },
+      { id: 'butterfly', isTarget: true, label: 'Golden Butterfly', emoji: '🦋', x: 66, y: 44, size: 64, rotation: 12 },
+      { id: 'sunflower', isTarget: false, label: 'Sunflower', emoji: '🌻', x: 14, y: 68, size: 62 },
+    ] as SceneItem[],
+  },
+  // Find 2: Ocean Pearl
+  'find-ocean-pearl': {
+    instruction: 'Search the ocean floor and find the glowing pearl!',
+    targetLabel: 'Glowing Pearl',
+    targetEmoji: '🦪',
+    backgroundTheme: 'ocean' as const,
+    sceneItems: [
+      { id: 'fish1', isTarget: false, label: 'Clownfish', emoji: '🐠', x: 22, y: 25, size: 56 },
+      { id: 'crab', isTarget: false, label: 'Red Crab', emoji: '🦀', x: 15, y: 78, size: 60 },
+      { id: 'jellyfish', isTarget: false, label: 'Jellyfish', emoji: '🪼', x: 78, y: 30, size: 65 },
+      { id: 'turtle', isTarget: false, label: 'Sea Turtle', emoji: '🐢', x: 46, y: 22, size: 70 },
+      { id: 'octopus', isTarget: false, label: 'Octopus', emoji: '🐙', x: 80, y: 75, size: 66 },
+      { id: 'blowfish', isTarget: false, label: 'Blowfish', emoji: '🐡', x: 48, y: 62, size: 52 },
+      { id: 'pearl', isTarget: true, label: 'Glowing Pearl', emoji: '🦪', x: 34, y: 76, size: 62, rotation: -8 },
+      { id: 'starfish', isTarget: false, label: 'Starfish', emoji: '⭐', x: 62, y: 82, size: 48 },
+    ] as SceneItem[],
+  },
+
   // Listen & Find 1: Fruits
   'listen-find-fruits': {
     promptAudio: 'Can you find the sweet apple?',
@@ -191,7 +252,7 @@ export const ACTIVITY_DATA = {
     ] as ChoiceItem[],
   },
 
-  // New Word 1: Giraffe (with exampleSentence & sentenceAudio)
+  // New Word 1: Giraffe
   'new-word-giraffe': {
     word: 'Giraffe',
     phonetics: 'dʒəˈræf',
@@ -199,7 +260,7 @@ export const ACTIVITY_DATA = {
     funFact: 'Giraffes are the tallest mammals on Earth with super long necks!',
     exampleSentence: 'The tall giraffe munches fresh leaves from the treetops.',
   },
-  // New Word 2: Telescope (with exampleSentence & sentenceAudio)
+  // New Word 2: Telescope
   'new-word-telescope': {
     word: 'Telescope',
     phonetics: 'ˈtel.ɪ.skoʊp',

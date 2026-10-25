@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Volume2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { sfx } from '../../sound/sfx';
 
@@ -10,21 +11,50 @@ export interface ThinkOption {
 
 export interface ThinkProps {
   promptText?: string;
+  promptAudio?: string;
   patternSequence: Array<{ emoji: string; label: string }>;
   options: ThinkOption[];
   correctOptionId: string;
   onComplete?: () => void;
+  onAudioStateChange?: (isPlaying: boolean) => void;
 }
 
 export const Think: React.FC<ThinkProps> = ({
   promptText = "What comes next in the pattern?",
+  promptAudio,
   patternSequence,
   options,
   correctOptionId,
   onComplete,
+  onAudioStateChange,
 }) => {
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
+
+  const audioPromptString = promptAudio || promptText;
+
+  const playPrompt = useCallback(() => {
+    setIsSpeaking(true);
+    onAudioStateChange?.(true);
+    sfx.speakPrompt(audioPromptString, () => {
+      setIsSpeaking(false);
+      onAudioStateChange?.(false);
+    });
+  }, [audioPromptString, onAudioStateChange]);
+
+  // Autoplay prompt on mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      playPrompt();
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [playPrompt]);
+
+  // Tap an item in the pattern sequence to speak its name
+  const handleItemTap = (item: { emoji: string; label: string }) => {
+    sfx.speakPrompt(item.label);
+  };
 
   const handleSelect = (option: ThinkOption) => {
     sfx.speakPrompt(option.label);
@@ -48,9 +78,24 @@ export const Think: React.FC<ThinkProps> = ({
 
   return (
     <div className="w-full max-w-3xl flex flex-col items-center">
-      {/* Question Header */}
-      <div className="w-full bg-white rounded-3xl p-6 shadow-xl border-4 border-purple-200 flex items-center justify-between gap-4 mb-8">
-        <div>
+      {/* Question Header with Audio Replay Button */}
+      <div className="w-full bg-white rounded-3xl p-6 shadow-xl border-4 border-purple-200 flex flex-col md:flex-row items-center gap-5 mb-8">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          animate={isSpeaking ? { scale: [1, 1.08, 1] } : {}}
+          transition={isSpeaking ? { repeat: Infinity, duration: 1.2 } : {}}
+          onClick={playPrompt}
+          className="relative bg-purple-500 hover:bg-purple-600 text-white p-4 rounded-2xl shadow-md transition flex items-center justify-center cursor-pointer"
+          title="Tap to hear question again"
+        >
+          <Volume2 className="w-8 h-8" />
+          <span className="absolute -bottom-2 bg-purple-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+            {isSpeaking ? 'Listening...' : 'Hear Prompt'}
+          </span>
+        </motion.button>
+
+        <div className="flex-1 text-center md:text-left">
           <span className="text-xs text-purple-600 font-bold uppercase tracking-wider block mb-1">
             Logic & Pattern Quest
           </span>
@@ -58,40 +103,51 @@ export const Think: React.FC<ThinkProps> = ({
             {promptText}
           </h2>
         </div>
+
         <div className="bg-purple-100 text-purple-700 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
           Think
         </div>
       </div>
 
       {/* Pattern Sequence Display */}
-      <div className="w-full bg-white rounded-3xl p-8 shadow-lg border-4 border-slate-100 mb-8 flex flex-wrap items-center justify-center gap-4">
-        {patternSequence.map((item, index) => (
-          <motion.div
-            key={index}
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: index * 0.1 }}
-            className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-slate-50 border-2 border-slate-200 flex flex-col items-center justify-center text-4xl md:text-5xl shadow-sm"
-          >
-            <span>{item.emoji}</span>
-          </motion.div>
-        ))}
+      <div className="w-full bg-white rounded-3xl p-8 shadow-lg border-4 border-slate-100 mb-8 flex flex-col items-center">
+        <div className="flex flex-wrap items-center justify-center gap-4">
+          {patternSequence.map((item, index) => (
+            <motion.div
+              key={index}
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => handleItemTap(item)}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: index * 0.1 }}
+              className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-slate-50 border-2 border-slate-200 flex flex-col items-center justify-center text-4xl md:text-5xl shadow-sm cursor-pointer hover:border-purple-300"
+              title={`Tap to hear "${item.label}"`}
+            >
+              <span>{item.emoji}</span>
+            </motion.div>
+          ))}
 
-        {/* Missing Target Slot */}
-        <motion.div
-          animate={isCorrect ? { scale: [1, 1.15, 1] } : {}}
-          className={`w-20 h-20 md:w-24 md:h-24 rounded-2xl border-4 border-dashed flex flex-col items-center justify-center text-4xl md:text-5xl transition-all ${
-            isCorrect
-              ? 'border-emerald-500 bg-emerald-50 shadow-emerald-200 shadow-md'
-              : 'border-purple-400 bg-purple-50 text-purple-600 animate-pulse'
-          }`}
-        >
-          {isCorrect ? (
-            <span>{options.find((o) => o.id === correctOptionId)?.emoji}</span>
-          ) : (
-            <span className="font-extrabold text-3xl">?</span>
-          )}
-        </motion.div>
+          {/* Missing Target Slot */}
+          <motion.div
+            animate={isCorrect ? { scale: [1, 1.15, 1] } : {}}
+            className={`w-20 h-20 md:w-24 md:h-24 rounded-2xl border-4 border-dashed flex flex-col items-center justify-center text-4xl md:text-5xl transition-all ${
+              isCorrect
+                ? 'border-emerald-500 bg-emerald-50 shadow-emerald-200 shadow-md'
+                : 'border-purple-400 bg-purple-50 text-purple-600 animate-pulse'
+            }`}
+          >
+            {isCorrect ? (
+              <span>{options.find((o) => o.id === correctOptionId)?.emoji}</span>
+            ) : (
+              <span className="font-extrabold text-3xl">?</span>
+            )}
+          </motion.div>
+        </div>
+
+        <p className="text-xs text-slate-400 mt-4 font-semibold">
+          💡 Tap any item to hear its name in the pattern
+        </p>
       </div>
 
       {/* Choice Options */}
